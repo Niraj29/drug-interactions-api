@@ -2,8 +2,6 @@ package com.example.app.config;
 
 import com.example.adapters.openfda.exception.OpenFDAException;
 import jakarta.validation.ConstraintViolationException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,43 +62,10 @@ public class GlobalControllerAdvice {
   public ResponseEntity<Object> handleOpenFDAException(OpenFDAException ex) {
     Map<String, Object> response = new HashMap<>();
     response.put("timestamp", Instant.now());
-
-    // Try to read a status code from the exception via reflection (avoids depending on
-    // Lombok-generated getter)
-    int statusValue = HttpStatus.BAD_GATEWAY.value();
-    try {
-      Object statusObj = null;
-      try {
-        Method m = ex.getClass().getMethod("getStatus");
-        statusObj = m.invoke(ex);
-      } catch (NoSuchMethodException ignored) {
-        // try direct field access
-        try {
-          Field f = ex.getClass().getDeclaredField("status");
-          f.setAccessible(true);
-          statusObj = f.get(ex);
-        } catch (NoSuchFieldException | IllegalAccessException ignored2) {
-        }
-      }
-      if (statusObj != null) {
-        try {
-          Method v = statusObj.getClass().getMethod("value");
-          Object val = v.invoke(statusObj);
-          if (val instanceof Number) statusValue = ((Number) val).intValue();
-        } catch (NoSuchMethodException
-            | IllegalAccessException
-            | java.lang.reflect.InvocationTargetException ignored) {
-          // ignore and keep default
-        }
-      }
-    } catch (Exception ignore) {
-      // fallback to BAD_GATEWAY
-    }
-
-    response.put("status", statusValue);
+    // Map any upstream OpenFDA adapter failures to 502 Bad Gateway (do not expose upstream status)
+    response.put("status", HttpStatus.BAD_GATEWAY.value());
     response.put("error", ex.getMessage());
-
-    return new ResponseEntity<>(response, HttpStatus.valueOf(statusValue));
+    return new ResponseEntity<>(response, HttpStatus.BAD_GATEWAY);
   }
 
   @ExceptionHandler(ResponseStatusException.class)
