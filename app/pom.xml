@@ -59,6 +59,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- attach the repackaged executable jar with a classifier so the original
+                         main artifact remains a normal JAR that other modules (tests) can depend on -->
+                    <classifier>exec</classifier>
+                </configuration>
             </plugin>
         </plugins>
     </build>

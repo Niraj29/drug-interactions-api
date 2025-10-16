@@ -1,7 +1,8 @@
 spring:
-  profiles: test
   application:
     name: drug-interactions-api-test
+  main:
+    allow-bean-definition-overriding: true
 
 openfda:
   base-url: http://localhost:${wiremock.server.port}

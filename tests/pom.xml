@@ -28,6 +28,13 @@
             <artifactId>adapters-memory</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- Make the application module available to the test classpath so @SpringBootTest can locate @SpringBootConfiguration -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>app</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

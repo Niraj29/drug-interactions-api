@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -24,6 +25,7 @@ import reactor.netty.resources.ConnectionProvider;
 public class OpenFDAClientConfig {
 
   @Bean
+  @Primary
   public WebClient openFDAWebClient(OpenFDAProperties properties) {
     ConnectionProvider provider =
         ConnectionProvider.builder("openfda-connection-pool")

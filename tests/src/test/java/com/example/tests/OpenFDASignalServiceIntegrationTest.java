@@ -3,6 +3,7 @@ package com.example.tests;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import com.example.adapters.openfda.OpenFDASignalService;
+import com.example.app.DrugInteractionsApplication;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
+@SpringBootTest(classes = DrugInteractionsApplication.class)
 @ActiveProfiles("test")
 class OpenFDASignalServiceIntegrationTest {
 
