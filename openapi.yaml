@@ -1,0 +1,259 @@
+openapi: 3.1.0
+info:
+  title: Drug Interactions API
+  description: |
+    API for managing and retrieving drug interaction information and FDA adverse event signals.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: interactions
+    description: Drug interaction notes management
+  - name: signals
+    description: OpenFDA adverse event signal analysis
+
+paths:
+  /interactions:
+    post:
+      tags:
+        - interactions
+      summary: Upsert an interaction note for a drug pair
+      operationId: upsertInteraction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InteractionUpsertRequest'
+            example:
+              drugA: "Aspirin"
+              drugB: "Warfarin"
+              note: "Increased risk of bleeding. Monitor closely."
+      responses:
+        '200':
+          description: Interaction note successfully upserted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InteractionResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+    get:
+      tags:
+        - interactions
+      summary: Get interaction note for a drug pair
+      operationId: getInteraction
+      parameters:
+        - name: drugA
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/DrugName'
+          example: "Aspirin"
+        - name: drugB
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/DrugName'
+          example: "Warfarin"
+      responses:
+        '200':
+          description: Interaction note found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InteractionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /signals:
+    get:
+      tags:
+        - signals
+      summary: Get adverse event signals from OpenFDA for a drug pair
+      operationId: getDrugSignals
+      parameters:
+        - name: drugA
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/DrugName'
+          example: "Aspirin"
+        - name: drugB
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/DrugName'
+          example: "Warfarin"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          example: 50
+      responses:
+        '200':
+          description: Adverse event signals successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalsResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '502':
+          $ref: '#/components/responses/UpstreamError'
+
+components:
+  schemas:
+    DrugName:
+      type: string
+      pattern: ^[A-Za-z][A-Za-z\s\-]{1,58}[A-Za-z]$
+      minLength: 3
+      maxLength: 60
+      description: Drug name containing only letters, spaces, and hyphens
+      example: "Acetaminophen"
+
+    InteractionUpsertRequest:
+      type: object
+      required:
+        - drugA
+        - drugB
+        - note
+      properties:
+        drugA:
+          $ref: '#/components/schemas/DrugName'
+        drugB:
+          $ref: '#/components/schemas/DrugName'
+        note:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Interaction note text
+      example:
+        drugA: "Aspirin"
+        drugB: "Warfarin"
+        note: "Increased risk of bleeding. Monitor closely."
+
+    InteractionResponse:
+      type: object
+      required:
+        - drugA
+        - drugB
+        - note
+      properties:
+        drugA:
+          $ref: '#/components/schemas/DrugName'
+        drugB:
+          $ref: '#/components/schemas/DrugName'
+        note:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      example:
+        drugA: "Aspirin"
+        drugB: "Warfarin"
+        note: "Increased risk of bleeding. Monitor closely."
+        timestamp: "2025-10-16T14:30:00Z"
+
+    SignalsResponse:
+      type: object
+      required:
+        - drugA
+        - drugB
+        - count
+        - topReactions
+      properties:
+        drugA:
+          $ref: '#/components/schemas/DrugName'
+        drugB:
+          $ref: '#/components/schemas/DrugName'
+        count:
+          type: integer
+          minimum: 0
+          description: Total number of adverse event records found
+        topReactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReactionCount'
+      example:
+        drugA: "Aspirin"
+        drugB: "Warfarin"
+        count: 150
+        topReactions:
+          - reaction: "Gastrointestinal hemorrhage"
+            count: 45
+          - reaction: "Epistaxis"
+            count: 30
+
+    ReactionCount:
+      type: object
+      required:
+        - reaction
+        - count
+      properties:
+        reaction:
+          type: string
+          description: Name of the adverse reaction
+        count:
+          type: integer
+          minimum: 1
+          description: Number of occurrences of this reaction
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+
+  responses:
+    ValidationError:
+      description: Invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "VALIDATION_ERROR"
+            message: "Invalid input parameters"
+            details: ["drugA must be between 3 and 60 characters"]
+
+    NotFound:
+      description: Interaction note not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "NOT_FOUND"
+            message: "No interaction note found for the specified drug pair"
+
+    UpstreamError:
+      description: Error communicating with upstream service
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "UPSTREAM_ERROR"
+            message: "Error communicating with OpenFDA service"

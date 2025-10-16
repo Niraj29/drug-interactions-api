@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: drug-interactions-api
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  webflux:
+    base-path: /api
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+openfda:
+  base-url: https://api.fda.gov/drug/event.json
+  api-key: ${FDA_API_KEY:}
+  timeout: 5000
+  default-limit: 100
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+    org.springframework.web: INFO
+    org.springframework.web.reactive: DEBUG

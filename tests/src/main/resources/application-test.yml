@@ -1,0 +1,10 @@
+spring:
+  profiles: test
+  application:
+    name: drug-interactions-api-test
+
+openfda:
+  base-url: http://localhost:${wiremock.server.port}
+  api-key: test-api-key
+  timeout: 1000
+  default-limit: 10

@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "disclaimer": "OpenFDA test data",
+    "results": {
+      "skip": 0,
+      "limit": 10,
+      "total": 150
+    }
+  },
+  "results": [
+    {
+      "safetyreportid": "12345",
+      "patient_drug": [
+        {
+          "medicinalproduct": "ASPIRIN",
+          "drugcharacterization": "1"
+        },
+        {
+          "medicinalproduct": "WARFARIN",
+          "drugcharacterization": "1"
+        }
+      ],
+      "patient_reaction": [
+        {
+          "reactionmeddrapt": "BLEEDING",
+          "reactionoutcome": "2"
+        }
+      ]
+    },
+    {
+      "safetyreportid": "12346",
+      "patient_drug": [
+        {
+          "medicinalproduct": "ASPIRIN",
+          "drugcharacterization": "1"
+        },
+        {
+          "medicinalproduct": "WARFARIN",
+          "drugcharacterization": "1"
+        }
+      ],
+      "patient_reaction": [
+        {
+          "reactionmeddrapt": "INCREASED INR",
+          "reactionoutcome": "2"
+        }
+      ]
+    }
+  ]
+}
+
